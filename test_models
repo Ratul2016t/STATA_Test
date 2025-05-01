@@ -1,0 +1,91 @@
+✅ After Estimating the Model
+
+Assume you already ran:
+```stata
+reg ln_gdp ln_capital ln_labor
+```
+
+Now proceed with the following tests:
+
+---
+ 1. 📉 **Multicollinearity — VIF Test**
+```stata
+vif
+```
+ ✅ Interpretation:
+- **VIF > 10** → Serious multicollinearity concern
+- **VIF between 5–10** → Moderate concern
+- **VIF < 5** → Acceptable
+
+2. 📈 **Heteroskedasticity — Breusch-Pagan Test**
+```stata
+estat hettest
+```
+
+ ✅ Interpretation:
+- **Null**: Constant variance (homoskedasticity)
+- **Alternative**: Heteroskedasticity
+- **Significance level**: p < 0.05 → **heteroskedasticity is present**
+
+If significant → Use robust standard errors:
+```stata
+reg ln_gdp ln_capital ln_labor, robust
+```
+
+---
+
+ 3. 📊 **Normality of Residuals — Skewness/Kurtosis (Jarque-Bera)**
+```stata
+predict resid, residuals
+sktest resid
+```
+
+ ✅ Interpretation:
+- **Null**: Residuals are normally distributed
+- **Significance level**: p > 0.05 → residuals are normal
+- **p < 0.05** → violation of normality
+
+---
+
+ 4. 📐 **Model Specification — Ramsey RESET Test**
+```stata
+estat ovtest
+```
+
+ ✅ Interpretation:
+- **Null**: Model is correctly specified
+- **Significance level**: p < 0.05 → model is **misspecified** (e.g., missing variables or wrong functional form)
+
+---
+ 5. 🔁 **Autocorrelation — Breusch-Godfrey (for time series or panel data)**
+
+If your dataset is **time series** or **panel**:
+
+ Set time or panel structure:
+```stata
+tsset year              // for time series
+// or
+xtset country year      // for panel data
+```
+
+#### Then run the test:
+```stata
+estat bgodfrey
+```
+
+ ✅ Interpretation:
+- **Null**: No autocorrelation
+- **Significance level**: p < 0.05 → autocorrelation is present
+
+---
+
+## 📌 Summary Table of Significance Levels
+
+| Test           | Null Hypothesis                     | p-value Threshold | Action if p < 0.05                  |
+|----------------|--------------------------------------|-------------------|-------------------------------------|
+| `vif`          | —                                    | >10 = problem     | Consider dropping/combining vars    |
+| `estat hettest`| Homoskedasticity                     | p < 0.05          | Use robust standard errors          |
+| `sktest`       | Normal residuals                     | p < 0.05          | Normality violated; caution needed  |
+| `estat ovtest` | Model correctly specified            | p < 0.05          | Misspecification → check model      |
+| `estat bgodfrey`| No autocorrelation                   | p < 0.05          | Autocorrelation present → adjust    |
+
